@@ -33,8 +33,8 @@
 
   GroupedCollection.GroupModel = Backbone.Model;
   GroupedCollection.GroupCollection = Backbone.Collection.extend({
-    closeWith: function (event_emitter) {
-      event_emitter.on('close', this.stopListening);
+    closeWith: function (eventEmitter) {
+      eventEmitter.on('close', this.stopListening);
     }
   });
 
@@ -57,52 +57,52 @@
     needs(options, 'collection', 'The base collection to group');
     needs(options, 'groupBy', 'The function that returns a model\'s group id');
 
-    options.group_collection = new Constructor(null, {
+    options.groupCollection = new Constructor(null, {
       comparator: options.comparator
     });
 
     GroupedCollection._onReset(options);
-    options.group_collection.listenTo(options.collection, 'add', _.partial(GroupedCollection._onAdd, options));
-    options.group_collection.listenTo(options.collection, 'change', _.partial(GroupedCollection._onAdd, options));
-    options.group_collection.listenTo(options.collection, 'remove', _.partial(GroupedCollection._onRemove, options));
-    options.group_collection.listenTo(options.collection, 'reset', _.partial(GroupedCollection._onReset, options));
+    options.groupCollection.listenTo(options.collection, 'add', _.partial(GroupedCollection._onAdd, options));
+    options.groupCollection.listenTo(options.collection, 'change', _.partial(GroupedCollection._onAdd, options));
+    options.groupCollection.listenTo(options.collection, 'remove', _.partial(GroupedCollection._onRemove, options));
+    options.groupCollection.listenTo(options.collection, 'reset', _.partial(GroupedCollection._onReset, options));
 
 
     if (!options.close_with) {
-      console.warn("You should provide an event emitter via `close_with`," +
-        " or else the listeners will never be unbound!");
+      console.warn('You should provide an event emitter via `close_with`,' +
+        ' or else the listeners will never be unbound!');
     } else {
-      options.group_collection.listenToOnce(options.close_with,
-          'close', options.group_collection.stopListening);
-      options.group_collection.listenToOnce(options.close_with,
-          'destroy', options.group_collection.stopListening);
+      options.groupCollection.listenToOnce(options.close_with,
+          'close', options.groupCollection.stopListening);
+      options.groupCollection.listenToOnce(options.close_with,
+          'destroy', options.groupCollection.stopListening);
     }
 
-    return options.group_collection;
+    return options.groupCollection;
   };
 
   /**
    * Creates a Group model for a given id.
    *
    * @param {Object} options
-   * @param {String} group_id
+   * @param {String} groupId
    * @return {Group}
    */
-  GroupedCollection._createGroup = function (options, group_id) {
+  GroupedCollection._createGroup = function (options, groupId) {
     var Constructor = options.GroupModel || GroupedCollection.GroupModel,
-        vc, group, vc_options;
+        vc, group, vcOptions;
 
-    vc_options = _.extend(options.vc_options || {}, {
+    vcOptions = _.extend(options.vc_options || {}, {
       filter: function (model) {
-        return options.groupBy(model) === group_id;
+        return options.groupBy(model) === groupId;
       },
       close_with: options.close_with
     });
 
-    vc = new Backbone.VirtualCollection(options.collection, vc_options);
-    group = new Constructor({id: group_id, vc: vc});
+    vc = new Backbone.VirtualCollection(options.collection, vcOptions);
+    group = new Constructor({id: groupId, vc: vc});
     group.vc = vc;
-    vc.listenTo(vc, 'remove', _.partial(GroupedCollection._onVcRemove, options.group_collection, group));
+    vc.listenTo(vc, 'remove', _.partial(GroupedCollection._onVcRemove, options.groupCollection, group));
 
     return group;
   };
@@ -116,8 +116,8 @@
   GroupedCollection._onAdd = function (options, model) {
     var id = options.groupBy(model);
 
-    if (!options.group_collection.get(id)) {
-      options.group_collection.add(GroupedCollection._createGroup(options, id));
+    if (!options.groupCollection.get(id)) {
+      options.groupCollection.add(GroupedCollection._createGroup(options, id));
     }
   };
 
@@ -129,10 +129,10 @@
    */
   GroupedCollection._onRemove = function (options, model) {
     var id = options.groupBy(model),
-        group = options.group_collection.get(id);
+        group = options.groupCollection.get(id);
 
     if (group && !group.vc.length) {
-      options.group_collection.remove(group);
+      options.groupCollection.remove(group);
     }
   };
 
@@ -142,19 +142,19 @@
    * @param {Object} options
    */
   GroupedCollection._onReset = function (options) {
-    var group_ids = _.uniq(options.collection.map(options.groupBy));
-    options.group_collection.reset(_.map(group_ids, _.partial(GroupedCollection._createGroup, options)));
+    var groupIds = _.uniq(options.collection.map(options.groupBy));
+    options.groupCollection.reset(_.map(groupIds, _.partial(GroupedCollection._createGroup, options)));
   };
 
   /**
    * Handles vc removal
    *
-   * @param {VirtualCollection} group_collection
+   * @param {VirtualCollection} groupCollection
    * @param {?} group
    */
-  GroupedCollection._onVcRemove = function (group_collection, group) {
+  GroupedCollection._onVcRemove = function (groupCollection, group) {
     if (!group.vc.length) {
-      group_collection.remove(group);
+      groupCollection.remove(group);
     }
   };
 
