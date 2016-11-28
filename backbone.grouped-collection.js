@@ -48,6 +48,7 @@
    *  - {[Function]} comparator
    *  - {[Function]} GroupModel the group model
    *  - {[Function]} GroupCollection the groups collection
+   *  - {[Function]} event_listeners hash of events and associated callback function
    *
    * @return {Collection}
    */
@@ -61,11 +62,19 @@
       comparator: options.comparator
     });
 
+    options.event_listeners = _.extend({}, {
+      add: GroupedCollection._onAdd,
+      change: GroupedCollection._onAdd,
+      remove: GroupedCollection._onRemove,
+      reset: GroupedCollection._onReset
+    }, options.event_listeners);
+
     GroupedCollection._onReset(options);
-    options.groupCollection.listenTo(options.collection, 'add', _.partial(GroupedCollection._onAdd, options));
-    options.groupCollection.listenTo(options.collection, 'change', _.partial(GroupedCollection._onAdd, options));
-    options.groupCollection.listenTo(options.collection, 'remove', _.partial(GroupedCollection._onRemove, options));
-    options.groupCollection.listenTo(options.collection, 'reset', _.partial(GroupedCollection._onReset, options));
+    _.each(options.event_listeners, function(handlerFunction, eventName) {
+      if(handlerFunction !== false) {
+        options.groupCollection.listenTo(options.collection, eventName, _.partial(handlerFunction, options));
+      }
+    }, this);
 
 
     if (!options.close_with) {
@@ -103,6 +112,9 @@
     group = new Constructor({id: groupId, vc: vc});
     group.vc = vc;
     vc.listenTo(vc, 'remove', _.partial(GroupedCollection._onVcRemove, options.groupCollection, group));
+    if(_.isFunction(options.onCreateGroup)) {
+      options.onCreateGroup(group);
+    }
 
     return group;
   };
