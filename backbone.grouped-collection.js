@@ -42,21 +42,13 @@
         this.model = opts.GroupModel;
       }
       this.opts = opts;
-      
-      opts.event_listeners = _.extend({}, {
-        add: this._onAdd,
-        change: this._onAdd,
-        remove: this._onRemove,
-        reset: this._onReset
-      }, opts.event_listeners);
 
       this._onReset(opts);
-      _.each(opts.event_listeners, function(handlerFunction, eventName) {
-        if(handlerFunction !== false) {
-          this.listenTo(opts.collection, eventName, handlerFunction);
-        }
-      }, this);
-
+      
+      this.listenTo(this.collection, 'add', this._onAdd);
+      this.listenTo(this.collection, 'change', this._onAdd);
+      this.listenTo(this.collection, 'remove', this._onRemove);
+      this.listenTo(this.collection, 'reset', this._onReset);
 
       if (!opts.close_with) {
         console.warn('You should provide an event emitter via `close_with`,' +
@@ -155,7 +147,6 @@
    *  - {[Function]} comparator
    *  - {[Function]} GroupModel the group model
    *  - {[Function]} GroupCollection the groups collection
-   *  - {[Function]} event_listeners hash of events and associated callback function
    *
    * @return {Collection}
    */
