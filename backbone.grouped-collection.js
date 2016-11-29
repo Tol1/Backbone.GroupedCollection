@@ -92,9 +92,7 @@
       group = new Model({id: groupId, vc: vc});
       group.vc = vc;
       this.listenToOnce(vc, 'remove', _.partial(this._onVcRemove, group));
-      if(_.isFunction(this.opts.onCreateGroup)) {
-        this.opts.onCreateGroup(group);
-      }
+      this.trigger('created:group', group);
 
       return group;
     },
