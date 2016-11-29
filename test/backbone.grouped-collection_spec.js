@@ -59,7 +59,7 @@ describe('Backbone.GroupedCollection', function () {
 
       gc = Backbone.buildGroupedCollection({
         collection: collection,
-        GroupCollection: Backbone.Collection.extend({
+        GroupCollection: Backbone.GroupedCollection.GroupCollection.extend({
           stopListening: sinon.stub(),
         }),
         groupBy: byClub,
