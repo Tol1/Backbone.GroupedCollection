@@ -43,7 +43,7 @@
       }
       this.opts = opts;
 
-      this._onReset(opts);
+      this._onReset();
       
       this.listenTo(this.collection, 'add', this._onAdd);
       this.listenTo(this.collection, 'change', this._onAdd);
@@ -81,7 +81,7 @@
       });
 
       vc = new Backbone.VirtualCollection(this.collection, vcOptions);
-      group = new Model({id: groupId, vc: vc});
+      group = new Model({id: groupId, vc: vc}, this.opts.model_options);
       group.vc = vc;
       this.listenToOnce(vc, 'remove', _.partial(this._onVcRemove, group));
       this.trigger('created:group', group);
