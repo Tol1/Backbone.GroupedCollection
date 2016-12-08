@@ -83,7 +83,7 @@
       vc = new Backbone.VirtualCollection(this.collection, vcOptions);
       group = new Model({id: groupId, vc: vc}, this.opts.model_options);
       group.vc = vc;
-      this.listenToOnce(vc, 'remove', _.partial(this._onVcRemove, group));
+      this.listenTo(vc, 'remove', _.partial(this._onVcRemove, group));
       this.trigger('created:group', group);
 
       return group;
